@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BroBasket — Supplier Catalog</title>
+<style>
+:root{
+  --ink:#1a1512; --ink2:#5c544d; --line:#e7e1d8; --bg:#faf7f2; --card:#fff;
+  --accent:#8a5a2b; --accent2:#b07a3f; --gold:#c79a4b; --green:#3d7a4f; --red:#a3492f;
+  --shadow:0 1px 3px rgba(60,40,20,.06),0 8px 24px rgba(60,40,20,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(135deg,#2a201a,#3d2c1e);color:#f6efe4;padding:22px 28px;
+  position:sticky;top:0;z-index:50;box-shadow:0 2px 20px rgba(0,0,0,.18)}
+.h-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:800;letter-spacing:-.4px}
+.logo span{color:var(--gold)}
+.tag{font-size:12.5px;color:#c9b89f;font-weight:500}
+.controls{max-width:1400px;margin:16px auto 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:260px;position:relative}
+.search input{width:100%;padding:13px 16px 13px 42px;border:none;border-radius:11px;font-size:15px;
+  background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.4}
+select,.btn{padding:12px 14px;border:none;border-radius:10px;background:#fff;color:var(--ink);
+  font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.wrap{max-width:1400px;margin:0 auto;padding:0 28px 60px}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0 8px}
+.chip{padding:8px 15px;border-radius:20px;border:1px solid var(--line);background:var(--card);
+  font-size:13px;font-weight:600;cursor:pointer;color:var(--ink2);transition:.12s}
+.chip:hover{border-color:var(--accent2);color:var(--accent)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip .n{opacity:.6;font-weight:500;margin-left:5px;font-size:11.5px}
+.chip.active .n{opacity:.8}
+.meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  margin:14px 0;font-size:13.5px;color:var(--ink2)}
+.meta b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;transition:.14s}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(60,40,20,.09),0 16px 36px rgba(60,40,20,.08)}
+.card-img{height:150px;background:#f3ede3 center/contain no-repeat;display:flex;align-items:center;
+  justify-content:center;position:relative;border-bottom:1px solid var(--line)}
+.card-img .ph{font-size:38px;opacity:.18}
+.card-body{padding:14px 15px;display:flex;flex-direction:column;gap:7px;flex:1}
+.c-cat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent2)}
+.c-name{font-size:14.5px;font-weight:700;line-height:1.3;color:var(--ink)}
+.c-meta{font-size:12px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px}
+.c-meta .pill{background:#f3ede3;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.c-foot{margin-top:auto;padding-top:10px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.price{font-size:19px;font-weight:800;color:var(--ink)}
+.price .cs{font-size:11px;font-weight:600;color:var(--ink2);display:block}
+.price.none{font-size:13px;font-weight:600;color:var(--ink2)}
+.supplier{font-size:11px;color:var(--ink2);text-align:right;max-width:120px}
+.card a.link{color:var(--accent);text-decoration:none;font-weight:600;font-size:12px}
+.card a.link:hover{text-decoration:underline}
+.more{display:block;margin:30px auto;padding:13px 30px;background:var(--accent);color:#fff;
+  border:none;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer}
+.more:hover{background:var(--accent2)}
+.empty{text-align:center;padding:70px 20px;color:var(--ink2)}
+.empty .big{font-size:42px;opacity:.25;margin-bottom:10px}
+.loading{text-align:center;padding:90px 20px;color:var(--ink2);font-size:15px}
+.spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);
+  border-radius:50%;animation:s .8s linear infinite;margin:0 auto 16px}
+@keyframes s{to{transform:rotate(360deg)}}
+footer{text-align:center;padding:24px;color:var(--ink2);font-size:12px;border-top:1px solid var(--line)}
+@media(max-width:640px){.wrap,header{padding-left:16px;padding-right:16px}.grid{grid-template-columns:1fr 1fr;gap:10px}.card-img{height:120px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-top">
+    <div class="logo">Bro<span>Basket</span> · Supplier Catalog</div>
+    <div class="tag">Internal sourcing database — beer · wine · spirits across all distributors</div>
+  </div>
+  <div class="controls">
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Search 32,000+ products — e.g. 'reposado', 'gin 50ml', 'hazy ipa', 'cabernet'…" autocomplete="off">
+    </div>
+    <select id="supplier"><option value="">All suppliers</option></select>
+    <select id="sort">
+      <option value="rel">Sort: Relevance</option>
+      <option value="plow">Price: Low → High</option>
+      <option value="phigh">Price: High → Low</option>
+      <option value="name">Name: A → Z</option>
+    </select>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="cats" id="cats"></div>
+  <div class="meta"><div id="count">Loading…</div><div id="active-filters"></div></div>
+  <div id="results"></div>
+  <div id="loading" class="loading"><div class="spin"></div>Loading supplier catalog…</div>
+</div>
+
+<footer>BroBasket internal tool · Go-To Gifting LLC · Prices are distributor wholesale and may change — verify on supplier site before ordering.</footer>
+
+<script>
+let DATA=[], view=[], shown=0, PAGE=60;
+const $=id=>document.getElementById(id);
+const state={q:'',cat:'',supplier:'',sort:'rel'};
+
+const CAT_ICON={'Spirits':'🥃','Wine':'🍷','Beer':'🍺','RTD / Seltzer':'🥤','Cider':'🍎','Non-Alcoholic':'💧','Other':'📦','Uncategorized':'📦','Kombucha':'🫧','Sports Drink':'🥤'};
+
+fetch('data.json').then(r=>r.json()).then(d=>{
+  DATA=d; $('loading').style.display='none';
+  buildFacets(); apply();
+}).catch(e=>{$('loading').innerHTML='⚠️ Could not load data.json — make sure it sits next to index.html.';});
+
+function buildFacets(){
+  const cc={}, sc={};
+  DATA.forEach(p=>{cc[p.cat]=(cc[p.cat]||0)+1; sc[p.supplier]=(sc[p.supplier]||0)+1;});
+  const order=['Spirits','Wine','Beer','RTD / Seltzer','Cider','Non-Alcoholic','Other','Uncategorized'];
+  const cats=Object.keys(cc).sort((a,b)=>(order.indexOf(a)+99*(order.indexOf(a)<0))-(order.indexOf(b)+99*(order.indexOf(b)<0)));
+  let html=`<div class="chip active" data-cat="">All<span class="n">${DATA.length.toLocaleString()}</span></div>`;
+  cats.forEach(c=>{html+=`<div class="chip" data-cat="${c}">${CAT_ICON[c]||''} ${c}<span class="n">${cc[c].toLocaleString()}</span></div>`;});
+  $('cats').innerHTML=html;
+  $('cats').querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
+    state.cat=ch.dataset.cat;
+    $('cats').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    ch.classList.add('active'); apply();
+  });
+  const sup=$('supplier');
+  Object.keys(sc).sort().forEach(sname=>{
+    const o=document.createElement('option'); o.value=sname; o.textContent=`${sname} (${sc[sname].toLocaleString()})`; sup.appendChild(o);
+  });
+}
+
+let t;
+$('q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{state.q=e.target.value.trim().toLowerCase();apply();},180);};
+$('supplier').onchange=e=>{state.supplier=e.target.value;apply();};
+$('sort').onchange=e=>{state.sort=e.target.value;apply();};
+
+function apply(){
+  const terms=state.q.split(/\s+/).filter(Boolean);
+  view=DATA.filter(p=>{
+    if(state.cat && p.cat!==state.cat) return false;
+    if(state.supplier && p.supplier!==state.supplier) return false;
+    if(terms.length){
+      const hay=(p.name+' '+p.brand+' '+p.size+' '+p.origin+' '+p.desc+' '+p.cat).toLowerCase();
+      for(const tm of terms) if(!hay.includes(tm)) return false;
+    }
+    return true;
+  });
+  if(state.sort==='plow') view.sort((a,b)=>(a.price??1e9)-(b.price??1e9));
+  else if(state.sort==='phigh') view.sort((a,b)=>(b.price??-1)-(a.price??-1));
+  else if(state.sort==='name') view.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(terms.length){
+    view.sort((a,b)=>score(b,terms)-score(a,terms));
+  }
+  shown=0; $('results').innerHTML=''; render();
+  $('count').innerHTML=`<b>${view.length.toLocaleString()}</b> product${view.length!==1?'s':''}`+
+    (state.q?` matching "<b>${esc(state.q)}</b>"`:'');
+}
+function score(p,terms){let s=0;const n=p.name.toLowerCase();terms.forEach(tm=>{if(n.startsWith(tm))s+=3;else if(n.includes(tm))s+=1;});return s;}
+
+function render(){
+  const slice=view.slice(shown,shown+PAGE);
+  const frag=document.createDocumentFragment();
+  slice.forEach(p=>frag.appendChild(card(p)));
+  let res=$('results');
+  const oldBtn=$('moreBtn'); if(oldBtn) oldBtn.remove();
+  res.appendChild(frag);
+  shown+=slice.length;
+  if(shown<view.length){
+    const b=document.createElement('button'); b.id='moreBtn'; b.className='more';
+    b.textContent=`Load more (${(view.length-shown).toLocaleString()} remaining)`;
+    b.onclick=render; res.appendChild(b);
+  }
+  if(view.length===0){
+    res.innerHTML=`<div class="empty"><div class="big">🔍</div>No products match.<br>Try a broader term or clear filters.</div>`;
+  }
+}
+
+function card(p){
+  const el=document.createElement('div'); el.className='card';
+  const img=p.img?`<div class="card-img" style="background-image:url('${p.img}')"></div>`
+                  :`<div class="card-img"><span class="ph">${CAT_ICON[p.cat]||'📦'}</span></div>`;
+  const pills=[];
+  if(p.size) pills.push(p.size);
+  if(p.pack && p.pack!==p.size) pills.push(p.pack);
+  if(p.abv) pills.push(p.abv);
+  if(p.origin) pills.push(p.origin);
+  const pillHtml=pills.slice(0,3).map(x=>`<span class="pill">${esc(x)}</span>`).join('');
+  let priceHtml;
+  if(p.price!=null){
+    priceHtml=`<div class="price">$${p.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`+
+      (p.case_price!=null?`<span class="cs">case $${p.case_price.toLocaleString()}</span>`:'')+`</div>`;
+  } else if(p.case_price!=null){
+    priceHtml=`<div class="price">$${p.case_price.toLocaleString()}<span class="cs">per case</span></div>`;
+  } else priceHtml=`<div class="price none">Call for price</div>`;
+  const link=p.url?`<a class="link" href="${p.url}" target="_blank" rel="noopener">View ↗</a>`:'';
+  el.innerHTML=img+`<div class="card-body">
+    <div class="c-cat">${p.cat}</div>
+    <div class="c-name">${esc(p.name)}</div>
+    ${pillHtml?`<div class="c-meta">${pillHtml}</div>`:''}
+    <div class="c-foot">${priceHtml}
+      <div style="text-align:right"><div class="supplier">${esc(p.supplier)}</div>${link}</div>
+    </div></div>`;
+  return el;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+</script>
+</body>
+</html>
