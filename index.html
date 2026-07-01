@@ -46,6 +46,7 @@ select,.btn{padding:12px 14px;border:none;border-radius:10px;background:#fff;col
 .card-img .ph{font-size:38px;opacity:.18}
 .card-body{padding:14px 15px;display:flex;flex-direction:column;gap:7px;flex:1}
 .c-cat{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent2)}
+.c-brand{font-size:12px;font-weight:700;line-height:1.25;color:var(--accent);margin-top:-2px}
 .c-name{font-size:14.5px;font-weight:700;line-height:1.3;color:var(--ink)}
 .c-meta{font-size:12px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px}
 .c-meta .pill{background:#f3ede3;padding:2px 8px;border-radius:6px;white-space:nowrap}
@@ -225,6 +226,7 @@ function card(p){
   const link=p.url?`<a class="link" href="${p.url}" target="_blank" rel="noopener">View ↗</a>`:'';
   el.innerHTML=img+`<div class="card-body">
     <div class="c-cat">${p.cat}</div>
+    ${p.brand?`<div class="c-brand">${esc(p.brand)}</div>`:''}
     <div class="c-name">${esc(p.name)}</div>
     ${pillHtml?`<div class="c-meta">${pillHtml}</div>`:''}
     <div class="c-foot">${priceHtml}
