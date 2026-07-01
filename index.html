@@ -81,6 +81,8 @@ footer{text-align:center;padding:24px;color:var(--ink2);font-size:12px;border-to
       <input id="q" type="search" placeholder="Search 32,000+ products — e.g. 'reposado', 'gin 50ml', 'hazy ipa', 'cabernet'…" autocomplete="off">
     </div>
     <select id="supplier"><option value="">All suppliers</option></select>
+    <select id="type"><option value="">All types</option></select>
+    <select id="size"><option value="">All sizes</option></select>
     <select id="sort">
       <option value="rel">Sort: Relevance</option>
       <option value="plow">Price: Low → High</option>
@@ -102,7 +104,8 @@ footer{text-align:center;padding:24px;color:var(--ink2);font-size:12px;border-to
 <script>
 let DATA=[], view=[], shown=0, PAGE=60;
 const $=id=>document.getElementById(id);
-const state={q:'',cat:'',supplier:'',sort:'rel'};
+const state={q:'',cat:'',supplier:'',type:'',size:'',sort:'rel'};
+const SIZE_ORDER=['Mini (≤100ml)','101–200ml','201–375ml','376–500ml','501–750ml','751ml–1L','Large (>1L)','Multipack','Keg / Draft','Other'];
 
 const CAT_ICON={'Spirits':'🥃','Wine':'🍷','Beer':'🍺','RTD / Seltzer':'🥤','Cider':'🍎','Non-Alcoholic':'💧','Other':'📦','Uncategorized':'📦','Kombucha':'🫧','Sports Drink':'🥤'};
 
@@ -122,17 +125,41 @@ function buildFacets(){
   $('cats').querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
     state.cat=ch.dataset.cat;
     $('cats').querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-    ch.classList.add('active'); apply();
+    ch.classList.add('active'); buildTypeSize(); apply();
   });
   const sup=$('supplier');
   Object.keys(sc).sort().forEach(sname=>{
     const o=document.createElement('option'); o.value=sname; o.textContent=`${sname} (${sc[sname].toLocaleString()})`; sup.appendChild(o);
   });
+  buildTypeSize();
+}
+
+function buildTypeSize(){
+  // Type + size options reflect the currently selected category (or all)
+  const pool=DATA.filter(p=>!state.cat || p.cat===state.cat);
+  const tc={}, zc={};
+  pool.forEach(p=>{ if(p.type) tc[p.type]=(tc[p.type]||0)+1; if(p.size_bucket) zc[p.size_bucket]=(zc[p.size_bucket]||0)+1; });
+  const typeSel=$('type'), sizeSel=$('size');
+  typeSel.innerHTML='<option value="">All types</option>';
+  Object.keys(tc).sort((a,b)=>tc[b]-tc[a]).forEach(t=>{
+    const o=document.createElement('option'); o.value=t; o.textContent=`${t} (${tc[t].toLocaleString()})`;
+    if(t===state.type) o.selected=true; typeSel.appendChild(o);
+  });
+  sizeSel.innerHTML='<option value="">All sizes</option>';
+  Object.keys(zc).sort((a,b)=>(SIZE_ORDER.indexOf(a)+99*(SIZE_ORDER.indexOf(a)<0))-(SIZE_ORDER.indexOf(b)+99*(SIZE_ORDER.indexOf(b)<0))).forEach(z=>{
+    const o=document.createElement('option'); o.value=z; o.textContent=`${z} (${zc[z].toLocaleString()})`;
+    if(z===state.size) o.selected=true; sizeSel.appendChild(o);
+  });
+  // reset selections that no longer exist in this category
+  if(state.type && !tc[state.type]){state.type=''; typeSel.value='';}
+  if(state.size && !zc[state.size]){state.size=''; sizeSel.value='';}
 }
 
 let t;
 $('q').oninput=e=>{clearTimeout(t);t=setTimeout(()=>{state.q=e.target.value.trim().toLowerCase();apply();},180);};
 $('supplier').onchange=e=>{state.supplier=e.target.value;apply();};
+$('type').onchange=e=>{state.type=e.target.value;apply();};
+$('size').onchange=e=>{state.size=e.target.value;apply();};
 $('sort').onchange=e=>{state.sort=e.target.value;apply();};
 
 function apply(){
@@ -140,6 +167,8 @@ function apply(){
   view=DATA.filter(p=>{
     if(state.cat && p.cat!==state.cat) return false;
     if(state.supplier && p.supplier!==state.supplier) return false;
+    if(state.type && p.type!==state.type) return false;
+    if(state.size && p.size_bucket!==state.size) return false;
     if(terms.length){
       const hay=(p.name+' '+p.brand+' '+p.size+' '+p.origin+' '+p.desc+' '+p.cat).toLowerCase();
       for(const tm of terms) if(!hay.includes(tm)) return false;
